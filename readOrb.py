@@ -30,7 +30,7 @@ def readOrb(orb):
     sfcType=fh['NS/PRE/landSurfaceType'][:,:]
     reliabF=fh['/NS/SRT/reliabFlag'][:,:]
     piaKu=fh['/NS/SRT/pathAtten'][:,:]
-    locZAngle=f['/NS/PRE/localZenithAngle'][:,:]
+    locZAngle=fh['/NS/PRE/localZenithAngle'][:,:]
     #print(fh['NS/PRE'])
     return zku,bzd,bst,brs,bcf,zsfc,hzero,lon,lat,fh,t,sfcPrecip,pType,zka,bbPeak,\
         sfcType,reliabF,piaKu,locZAngle
