@@ -8,44 +8,44 @@ end module microwFreq
 
 module Tables2                              ! look up table module
   ! this module defines the structure of the look up tables
-  ! to see how these tables are used have a look at subroutines 
-  ! integratecvHB and integratestHB in retTablesInt.f90 
+  ! to see how these tables are used have a look at subroutines
+  ! integratecvHB and integratestHB in retTablesInt.f90
   integer :: nbins, nbinG, nbinS2, nbinH, &                       ! # of entries (rows) in the lookup tables
        nmu                                  ! # of mus in the look up tables
   real :: zmin,&                            ! min reflectivity in the tables (dBZ)
-       dzbin                                ! reflectivity bin size (dB) 
-                                            ! this is used to quickly locate an entry in the 
+       dzbin                                ! reflectivity bin size (dB)
+                                            ! this is used to quickly locate an entry in the
                                             ! lookup table as i=(z-zmin)/dzbin
 
   integer, allocatable :: i0max(:)          ! the last rows in the look up tables contain data only
-  integer, allocatable :: i0BBmax(:) 
+  integer, allocatable :: i0BBmax(:)
                                             ! for rain and melting snow
                                             ! so (zsnow-zmin)/dzbin cannot be greater than i0max
   integer :: nmfreq
   integer, allocatable :: ibranch(:)
   real :: d013Smax, d013BBmax, d013max
   real :: d013Smin, d013BBmin, d013min
- 
+
   integer :: i0HTS(400), i0HT(400), i0HTBB(400)
 
   real,allocatable :: z13Table(:,:), att13Table(:,:), &
        pwc13Table(:,:)  ! rain reflectivity (dBZ), attenuation (dB/km), and
-                        ! precipitation water conter(g/m3) at Ku-band 
-                       
+                        ! precipitation water conter(g/m3) at Ku-band
+
 
   real,allocatable :: z13TableS(:,:), att13TableS(:,:), &
        pwc13TableS(:,:) ! snow reflectivity (dBZ), attenuation (dB/km), and
-                        ! precipitation water conter(g/m3) at Ku-band 
+                        ! precipitation water conter(g/m3) at Ku-band
 
   real,allocatable :: z13TableBB(:,:), att13TableBB(:,:), &
        pwc13TableBB(:,:)! BB reflectivity (dBZ), attenuation (dB/km), and
-                        ! precipitation water conter(g/m3) at Ku-band 
+                        ! precipitation water conter(g/m3) at Ku-band
 
   ! the next three statements have same meaning as the previous but for Ka-band
-  
-  real,allocatable :: z35Table(:,:), att35Table(:,:), &   
+
+  real,allocatable :: z35Table(:,:), att35Table(:,:), &
        pwc35Table(:,:)
-  
+
   real,allocatable :: z35TableS(:,:), att35TableS(:,:), &
       pwc35TableS(:,:)
 
@@ -146,7 +146,7 @@ subroutine readTablesDSDWG(extnmu,extnmfreq)
      open(10,file='TablesN/DmSm_aSy'//mus//'_sphere_Dmax3p0Dm_rain.dat')
      print*, 'TablesN/DmSm_aSy'//mus//'_sphere_Dmax3p0Dm_rain.dat'
 
-     do i=1,nbins       
+     do i=1,nbins
         read(10,*) &
              pwc13table(i,imu), z13table(i,imu), att13Table(i,imu), &
              z35Table(i,imu), att35Table(i,imu), pr13Table(i,imu), d013Table(i,imu), &
@@ -174,8 +174,8 @@ end subroutine readTablesDSDWG
 subroutine readTables2(extnmu,extnmfreq)
   ! this reads in the look up tables and stores them in the structures define in
   ! module Tables2
-  ! to see how these tables are used have a look at subroutines 
-  ! integratecvHB and integratestHB in retTablesInt.f90 
+  ! to see how these tables are used have a look at subroutines
+  ! integratecvHB and integratestHB in retTablesInt.f90
   use Tables2
   use microwFreq
   implicit none
@@ -199,7 +199,7 @@ subroutine readTables2(extnmu,extnmfreq)
        pwc13TableS(nbins,nmu))
   allocate( z13TableBB(nbins,nmu), att13TableBB(nbins,nmu), &
        pwc13TableBB(nbins,nmu))
-  
+
   allocate( z13TableG(nbins,nmu), att13TableG(nbins,nmu), &
        pwc13TableG(nbins,nmu))
 
@@ -208,10 +208,10 @@ subroutine readTables2(extnmu,extnmfreq)
 
   allocate( z13TableH(nbins,nmu), att13TableH(nbins,nmu), &
        pwc13TableH(nbins,nmu))
-  
+
   allocate( z35TableH(nbins,nmu), att35TableH(nbins,nmu), &
        pwc35TableH(nbins,nmu))
-  
+
   allocate( z35Table(nbins,nmu), att35Table(nbins,nmu), &
        pwc35Table(nbins,nmu))
   allocate( z35TableS(nbins,nmu), att35TableS(nbins,nmu), &
@@ -221,7 +221,7 @@ subroutine readTables2(extnmu,extnmfreq)
 
   allocate( kextTable(nbins,nmfreq,nmu), salbTable(nbins,nmfreq,nmu), &
        asymTable(nbins,nmfreq,nmu))
-  
+
   allocate( kextTableG(nbins,nmfreq,nmu), salbTableG(nbins,nmfreq,nmu), &
        asymTableG(nbins,nmfreq,nmu))
 
@@ -248,7 +248,7 @@ subroutine readTables2(extnmu,extnmfreq)
   allocate (mu_tab(nmu))
 !end    WSO 8/8/13
 
-  
+
   20 format((F4.1))
   do imu=1,extnmu
      mu=imu-3.
@@ -258,7 +258,7 @@ subroutine readTables2(extnmu,extnmfreq)
 !end    WSO 8/8/13
      write(mus,20) mu
      if(mus(1:1).ne.'-') mus(1:1)='0'
-     
+
      open(10,file='TablesN/tables.13-35GHz.mu.'//mus)
      !print*, 'TablesN/tables.13-35GHz.mu.'//mus, imu, extnmu
      read(10,*) dpwc35(imu), pwc35min(imu)
@@ -278,12 +278,12 @@ subroutine readTables2(extnmu,extnmfreq)
         if( z13Table(i,imu)- z35Table(i,imu)<z13Table(ibranch(imu),imu)- z35Table(ibranch(imu),imu)) then
            ibranch(imu)=i
         endif
-        
+
      enddo
      !print*, z13TableS(1:5,imu)
      !print*, z35TableS(1:5,imu)
      read(10,*) i0max(imu)
- 
+
      close(10)
      mfreq(7)=186.
      mfreq(8)=190.
@@ -325,8 +325,8 @@ end subroutine readTables2
 subroutine readTablesLiang(extnmu,extnmfreq)
   ! this reads in the look up tables and stores them in the structures define in
   ! module Tables2
-  ! to see how these tables are used have a look at subroutines 
-  ! integratecvHB and integratestHB in retTablesInt.f90 
+  ! to see how these tables are used have a look at subroutines
+  ! integratecvHB and integratestHB in retTablesInt.f90
   use Tables2
   use microwFreq
   implicit none
@@ -376,7 +376,7 @@ subroutine readTablesLiang(extnmu,extnmfreq)
 !begin  WSO 8/8/13
   allocate (mu_tab(nmu))
 !end    WSO 8/8/13
-  
+
   20 format((F4.1))
 
 
@@ -388,9 +388,9 @@ subroutine readTablesLiang(extnmu,extnmfreq)
 !end    WSO 8/8/13
      write(mus,20) mu
      if(mus(1:1).ne.'-') mus(1:1)='0'
-    
+
      open(10,file='nw_d0_dsd/liang.table.rho01mu2.mu4')
-   
+
      ibranch(imu)=1
      do i=1,nbins
         read(10,*) pwc13Table(i,imu), pwc13TableBB(i,imu),&
@@ -401,14 +401,14 @@ subroutine readTablesLiang(extnmu,extnmfreq)
              att35Table(i,imu), att35TableBB(i,imu), att35TableS(i,imu), &
              pr13Table(i,imu),pr13TableBB(i,imu),pr13TableS(i,imu), &
              d013Table(i,imu),d013TableBB(i,imu),d013TableS(i,imu)
-     
+
         if( z13Table(i,imu)- z35Table(i,imu)<z13Table(ibranch(imu),imu)- z35Table(ibranch(imu),imu)) then
            ibranch(imu)=i
         endif
      enddo
-    
+
      close(10)
-    
+
 
   enddo
 !  write(*,*) ibranch
@@ -418,9 +418,9 @@ subroutine readTablesLiang(extnmu,extnmfreq)
 !  write(*,*) att35TableBB(:,1)
 !  stop
   close(10)
-  
+
   !stop
-  
+
   !write(*,*) i0max
   ! stop
 10 format(30(F10.6))
@@ -431,8 +431,8 @@ end subroutine readTablesLiang
 subroutine readTablesLiang2(extnmu,extnmfreq)
   ! this reads in the look up tables and stores them in the structures define in
   ! module Tables2
-  ! to see how these tables are used have a look at subroutines 
-  ! integratecvHB and integratestHB in retTablesInt.f90 
+  ! to see how these tables are used have a look at subroutines
+  ! integratecvHB and integratestHB in retTablesInt.f90
   use Tables2
   use microwFreq
   implicit none
@@ -464,7 +464,7 @@ subroutine readTablesLiang2(extnmu,extnmfreq)
 
   allocate( z13TableBB(nbins,nmu), att13TableBB(nbins,nmu), &
        pwc13TableBB(nbins,nmu))
-  
+
   allocate( z13TableG(nbins,nmu), att13TableG(nbins,nmu), &
        pwc13TableG(nbins,nmu))
   allocate( z35TableG(nbins,nmu), att35TableG(nbins,nmu), &
@@ -542,12 +542,12 @@ subroutine readTablesLiang2(extnmu,extnmfreq)
      write(*, '("imu: ", i5, "  mu: ", f10.4, "  mu_tab: ", f10.4)') imu, mu, mu_tab(imu)
 !end    WSO 8/8/13
      write(mus,20) mu
-     
-     if(mus(1:1).ne.'-') then 
+
+     if(mus(1:1).ne.'-') then
         mus(1:1)='0'
         open(10,file='TablesN/tables.microw.mu.'//mus)
         read(10,*) nmfreq
-        read(10,*) (mfreq(i),i=1,nmfreq)  
+        read(10,*) (mfreq(i),i=1,nmfreq)
         nmfreq=extnmfreq
         mfreq(6)=165.5
         close(10)
@@ -561,13 +561,13 @@ subroutine readTablesLiang2(extnmu,extnmfreq)
      read(10,*) dumfreq
      do i=1,nbinG
         read(10,*) idum, z13TableG(i,imu), att13TableG(i,imu), &
-             d013TableG(i,imu), pwc13TableG(i,imu), pr13TableG(i,imu) 
+             d013TableG(i,imu), pwc13TableG(i,imu), pr13TableG(i,imu)
         pwc13TableG(i,imu)=log10(pwc13TableG(i,imu))
      enddo
      read(10,*) dumfreq
      do i=1,nbinG
         read(10,*) idum, z35TableG(i,imu), att35TableG(i,imu), &
-             d035TableG(i,imu), pwc35TableG(i,imu), pr35TableG(i,imu) 
+             d035TableG(i,imu), pwc35TableG(i,imu), pr35TableG(i,imu)
      enddo
      do j=1,7
         read(10,*) dumfreq
@@ -585,19 +585,19 @@ subroutine readTablesLiang2(extnmu,extnmfreq)
      asymTableG(:,8,imu)=asymTableG(:,7,imu)
      close(10)
 
-     
+
      open(10,file='nw_dm_dsd/snowTableRho0.8')
      read(10,*) nbinH
      read(10,*) dumfreq
      do i=1,nbinH
         read(10,*) idum, z13TableH(i,imu), att13TableH(i,imu), &
-             d013TableH(i,imu), pwc13TableH(i,imu), pr13TableH(i,imu) 
+             d013TableH(i,imu), pwc13TableH(i,imu), pr13TableH(i,imu)
         pwc13TableH(i,imu)=log10(pwc13TableH(i,imu))
      enddo
      read(10,*) dumfreq
      do i=1,nbinH
         read(10,*) idum, z35TableH(i,imu), att35TableH(i,imu), &
-             d035TableH(i,imu), pwc35TableH(i,imu), pr35TableH(i,imu) 
+             d035TableH(i,imu), pwc35TableH(i,imu), pr35TableH(i,imu)
      enddo
      do j=1,7
         read(10,*) dumfreq
@@ -623,13 +623,13 @@ subroutine readTablesLiang2(extnmu,extnmfreq)
      read(10,*) dumfreq
      do i=1,nbinS2
         read(10,*) idum, z13TableS2(i,imu), att13TableS2(i,imu), &
-             d013TableS2(i,imu), pwc13TableS2(i,imu), pr13TableS2(i,imu) 
+             d013TableS2(i,imu), pwc13TableS2(i,imu), pr13TableS2(i,imu)
         pwc13TableS2(i,imu)=log10(pwc13TableS2(i,imu))
      enddo
      read(10,*) dumfreq
      do i=1,nbinS2
         read(10,*) idum, z35TableS2(i,imu), att35TableS2(i,imu), &
-             d035TableS2(i,imu), pwc35TableS2(i,imu), pr35TableS2(i,imu) 
+             d035TableS2(i,imu), pwc35TableS2(i,imu), pr35TableS2(i,imu)
      enddo
      do j=1,7
         read(10,*) dumfreq
@@ -648,27 +648,27 @@ subroutine readTablesLiang2(extnmu,extnmfreq)
      close(10)
 
 
-     open(10,file='nw_dm_dsd/snowgTables.Dm.rho01.mu2.2')!end    WSO 12/30/13      
-     
+     open(10,file='nw_dm_dsd/snowgTables.Dm.rho01.mu2.2')!end    WSO 12/30/13
+
      do i=1,nbins
         read(10,*) &
              z13TableS(i,imu), att13TableS(i,imu),  &
              pwc13TableS(i,imu), &
              z35TableS(i,imu), att35TableS(i,imu),  &
              kextTableS(i,4,imu), salbTableS(i,4,imu), &
-             asymTableS(i,4,imu),  &      
+             asymTableS(i,4,imu),  &
              kextTableS(i,5,imu), salbTableS(i,5,imu), &
-             asymTableS(i,5,imu),  &      
+             asymTableS(i,5,imu),  &
              pr13TableS(i,imu), d013TableS(i,imu), &
              kextTableS(i,2,imu), salbTableS(i,2,imu), &
-             asymTableS(i,2,imu),  &      
+             asymTableS(i,2,imu),  &
              kextTableS(i,3,imu), salbTableS(i,3,imu), &
              asymTableS(i,3,imu), &
-             kextTableS(i,6,imu), salbTableS(i,6,imu), &  
-             asymTableS(i,6,imu), & 
-             kextTableS(i,7,imu), salbTableS(i,7,imu), &  
+             kextTableS(i,6,imu), salbTableS(i,6,imu), &
+             asymTableS(i,6,imu), &
+             kextTableS(i,7,imu), salbTableS(i,7,imu), &
              asymTableS(i,7,imu), &
-             kextTableS(i,1,imu), salbTableS(i,1,imu), &  
+             kextTableS(i,1,imu), salbTableS(i,1,imu), &
              asymTableS(i,1,imu)
         !print*, kextTableS(i,5:7,imu)
         salbTableS(i,1:7,imu)=salbTableS(i,1:7,imu)/kextTableS(i,1:7,imu)
@@ -684,69 +684,69 @@ subroutine readTablesLiang2(extnmu,extnmfreq)
      enddo
      !stop
      close(10)
-     
+
 !begin  WSO 12/30/13 insert Dm-indexed tables
      open(10,file='nw_dm_dsd/raingTables.Dm.rho01.mu2.2') !Sept 17, 2015 MG
      !open(10,file='nw_dm_dsd/raingTables.Dm.rho01.u.mu3')
 !end    WSO 12/30/13
-     
-     
+
+
      do i=1,nbins
         read(10,*) &
              z13Table(i,imu), att13Table(i,imu),  &
              pwc13Table(i,imu), &
              z35Table(i,imu), att35Table(i,imu),  &
              kextTable(i,4,imu), salbTable(i,4,imu), &
-             asymTable(i,4,imu),  &      
+             asymTable(i,4,imu),  &
              kextTable(i,5,imu), salbTable(i,5,imu), &
-             asymTable(i,5,imu),  &      
+             asymTable(i,5,imu),  &
              pr13Table(i,imu), d013Table(i,imu), &
              kextTable(i,2,imu), salbTable(i,2,imu), &
-             asymTable(i,2,imu),  &      
+             asymTable(i,2,imu),  &
              kextTable(i,3,imu), salbTable(i,3,imu), &
              asymTable(i,3,imu), &
              kextTable(i,6,imu), salbTable(i,6,imu), &
              asymTable(i,6,imu), &
              kextTable(i,7,imu), salbTable(i,7,imu), &
              asymTable(i,7,imu), &
-             kextTable(i,1,imu), salbTable(i,1,imu), &  
+             kextTable(i,1,imu), salbTable(i,1,imu), &
              asymTable(i,1,imu)
 
         salbTable(i,1:7,imu)=salbTable(i,1:7,imu)/kextTable(i,1:7,imu)
         salbTable(i,8,imu)=salbTable(i,7,imu)
         kextTable(i,8,imu)=kextTable(i,7,imu)
         asymTable(i,8,imu)=asymTable(i,7,imu)
-        !write(*,*) z13Table(i,imu), pr13Table(i,imu), d013Table(i,imu) 
+        !write(*,*) z13Table(i,imu), pr13Table(i,imu), d013Table(i,imu)
      enddo
-     
+
      close(10)
-     
+
 !begin  WSO 12/30/13 insert Dm-indexed tables
 !     open(10,file='nw_d0_dsd/bbgTables.rho01.mu2.2')
      open(10,file='nw_dm_dsd/bbgTables.Dm.rho02.mu2.2')
 !end    WSO 12/30/13
 
-     
-     
+
+
      do i=1,nbins
         read(10,*) &
              z13Tablebb(i,imu), att13Tablebb(i,imu),  &
              pwc13Tablebb(i,imu), &
              z35Tablebb(i,imu), att35Tablebb(i,imu),  &
              kextTablebb(i,4,imu), salbTablebb(i,4,imu), &
-             asymTablebb(i,4,imu),  &      
+             asymTablebb(i,4,imu),  &
              kextTablebb(i,5,imu), salbTablebb(i,5,imu), &
-             asymTablebb(i,5,imu),  &      
+             asymTablebb(i,5,imu),  &
              pr13Tablebb(i,imu), d013TableBB(i,imu), &
              kextTablebb(i,2,imu), salbTablebb(i,2,imu), &
-             asymTablebb(i,2,imu),  &      
+             asymTablebb(i,2,imu),  &
              kextTablebb(i,3,imu), salbTablebb(i,3,imu), &
              asymTablebb(i,3,imu), &
              kextTablebb(i,6,imu), salbTablebb(i,6,imu), &
              asymTablebb(i,6,imu), &
              kextTablebb(i,7,imu), salbTablebb(i,7,imu), &
              asymTablebb(i,7,imu), &
-             kextTablebb(i,1,imu), salbTablebb(i,1,imu), &  
+             kextTablebb(i,1,imu), salbTablebb(i,1,imu), &
              asymTablebb(i,1,imu)
         !print*, i, d013TableBB(i,1)
         salbTablebb(i,1:7,imu)=salbTablebb(i,1:7,imu)/kextTablebb(i,1:7,imu)
@@ -758,8 +758,8 @@ subroutine readTablesLiang2(extnmu,extnmfreq)
               i0BBmax(imu)=i
            endif
         endif
-        
-        
+
+
      enddo
      do i=1,-nbins
        print*, z13Tablebb(i,imu)-z35Tablebb(i,imu), z13Tablebb(i,imu), &
@@ -767,8 +767,8 @@ subroutine readTablesLiang2(extnmu,extnmfreq)
     enddo
     !stop
     close(10)
-     
-     
+
+
   enddo
   do i=1,nbins
      !write(*,*) kextTableS(i,5:8,1)
@@ -794,9 +794,9 @@ subroutine readTablesLiang2(extnmu,extnmfreq)
 !  write(*,*) att35TableBB(:,1)
 !  stop
 !  close(10)
-  
+
   !stop
-  
+
   !write(*,*) i0max
   !stop
   i0max=i0max-1
@@ -808,6 +808,63 @@ subroutine readTablesLiang2(extnmu,extnmfreq)
 
 
 end subroutine readTablesLiang2
+subroutine get_scatt_tables(ifreq)
+end
+subroutine get_radarKu(zKuJ,attKuJ,pwcJ,rrateJ,dmJ,&
+  zKuBBJ,attKuBBJ,pwcBBJ,rrateBBJ,dmBBJ,&
+  zKuSJ,attKuSJ,pwcSJ,rrateSJ,dmSJ,&
+  nKuJ,imu,nbinSJ)
+  use Tables2
+  integer :: nKuJ,imu,nbinSJ
+  real :: zKuJ(nKuJ),attKuJ(nKuJ),pwcJ(nKuJ),rrateJ(nKuJ),dmJ(nKuJ)
+  real :: zKuBBJ(nKuJ),attKuBBJ(nKuJ),pwcBBJ(nKuJ),rrateBBJ(nKuJ),dmBBJ(nKuJ)
+  real :: zKuSJ(nKuJ),attKuSJ(nKuJ),pwcSJ(nKuJ),rrateSJ(nKuJ),dmSJ(nKuJ)
+  zKuJ(1:nbins)=z13Table(1:nbins,imu)
+  attKuJ(1:nbins)=att13Table(1:nbins,imu)
+  pwcJ(1:nbins)=pwc13Table(1:nbins,imu)
+  rrateJ(1:nbins)=pr13Table(1:nbins,imu)
+  dmJ(1:nbins)=d013Table(1:nbins,imu)
+  zKuBBJ(1:nbins)=z13TableBB(1:nbins,imu)
+  attKuBBJ(1:nbins)=att13TableBB(1:nbins,imu)
+  pwcBBJ(1:nbins)=pwc13TableBB(1:nbins,imu)
+  rrateBBJ(1:nbins)=pr13TableBB(1:nbins,imu)
+  dmBBJ(1:nbins)=d013TableBB(1:nbins,imu)
+  zKuSJ(1:nbins)=z13TableS2(1:nbins,imu)
+  attKuSJ(1:nbins)=att13TableS2(1:nbins,imu)
+  pwcSJ(1:nbins)=pwc13TableS2(1:nbins,imu)
+  rrateSJ(1:nbins)=pr13TableS2(1:nbins,imu)
+  dmSJ(1:nbins)=d013TableS2(1:nbins,imu)
+  nbinSJ=nbinS2
+  print*,nbinS2
+end
+
+subroutine get_radarKa(zKuJ,attKuJ,pwcJ,rrateJ,dmJ,&
+  zKuBBJ,attKuBBJ,pwcBBJ,rrateBBJ,dmBBJ,&
+  zKuSJ,attKuSJ,pwcSJ,rrateSJ,dmSJ,&
+  nKuJ,imu,nbinSJ)
+  use Tables2
+  integer :: nKuJ,imu,nbinSJ
+  real :: zKuJ(nKuJ),attKuJ(nKuJ),pwcJ(nKuJ),rrateJ(nKuJ),dmJ(nKuJ)
+  real :: zKuBBJ(nKuJ),attKuBBJ(nKuJ),pwcBBJ(nKuJ),rrateBBJ(nKuJ),dmBBJ(nKuJ)
+  real :: zKuSJ(nKuJ),attKuSJ(nKuJ),pwcSJ(nKuJ),rrateSJ(nKuJ),dmSJ(nKuJ)
+  zKuJ(1:nbins)=z35Table(1:nbins,imu)
+  attKuJ(1:nbins)=att35Table(1:nbins,imu)
+  pwcJ(1:nbins)=pwc13Table(1:nbins,imu)
+  rrateJ(1:nbins)=pr13Table(1:nbins,imu)
+  dmJ(1:nbins)=d013Table(1:nbins,imu)
+  zKuBBJ(1:nbins)=z35TableBB(1:nbins,imu)
+  attKuBBJ(1:nbins)=att35TableBB(1:nbins,imu)
+  pwcBBJ(1:nbins)=pwc13TableBB(1:nbins,imu)
+  rrateBBJ(1:nbins)=pr13TableBB(1:nbins,imu)
+  dmBBJ(1:nbins)=d013TableBB(1:nbins,imu)
+  zKuSJ(1:nbins)=z35TableS2(1:nbins,imu)
+  attKuSJ(1:nbins)=att35TableS2(1:nbins,imu)
+  pwcSJ(1:nbins)=pwc35TableS2(1:nbins,imu)
+  rrateSJ(1:nbins)=pr35TableS2(1:nbins,imu)
+  dmSJ(1:nbins)=d035TableS2(1:nbins,imu)
+  nbinSJ=nbinS2
+  print*,nbinS2
+end
 
 subroutine makehashTables()
  use Tables2
