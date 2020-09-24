@@ -32,7 +32,7 @@ function callcmb(nodes,stormType,nmemb,nmu,brs,bst,hzero,bzd,bcf,bbPeak,sfcType,
     pia35ret=Cfloat(-99)
     ic,jc=Cint(1),Cint(1)
     z35Sim=Cfloat.(zeros(88).-99)
-    lwc_ret=Cfloat.(zeros(88).-99)
+    lwc_ret=Cfloat.(zeros(88))
     sysdN1=sysdN-0.1
     log10dNw=Cfloat.(0.00005*randn(88).+sysdN1)
     dr=Cfloat(0.25)
@@ -63,29 +63,43 @@ function callcmb(nodes,stormType,nmemb,nmu,brs,bst,hzero,bzd,bcf,bbPeak,sfcType,
     itype,
     kext,salb,asym,rrate,dm,hfreez,pia13srt,
     imembC)
-    if dm[nodes[4]]>0.5
-        log10dNw.-=0.3*(dm[nodes[4]]-1.5);
-        i0dm=Int(trunc((dm[nodes[4]]-0.5)/0.04));
+    for i=1:88
+        if dm[i]>0.5
+            log10dNw[i]-=0.15*(dm[i]-1.5);
+            i0dm=Int(trunc((dm[i]-0.5)/0.04));
+            i0dm=max(0,i0dm)
+            i0dm=min(59,i0dm)
+            log10dNw[i]+=0.2*(nwdm[i0dm+1,3]-log10dNw[i]);
+        end
+    end
+    if dm[nodes[5]]>0.5
+        log10dNw.-=0.15*(dm[nodes[5]]-1.5);
+        i0dm=Int(trunc((dm[nodes[5]]-0.5)/0.04));
         i0dm=max(0,i0dm)
         i0dm=min(59,i0dm)
-        log10dNw.+=0.6*(nwdm[i0dm,3].-log10dNw);
+        log10dNw.+=0.2*(nwdm[i0dm,3].-log10dNw);
         log10dNw=Cfloat.(log10dNw);
-        ccall((:fhb11_,"./combAlg"),Cvoid,(Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat}, # z13true,z35true,z13obs,pia13ret,pia35ret,
-        Ref{Cint},Ref{Cint}, #ic,jc
-        Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat}, #z35Sim,lwc_ret,log10dNw,dr,
-        Ref{Cint},Ref{Cint},Ref{Cint},Ref{Cint},Ref{Cint}, #nodes,isurf,imu,ngates,nmfreqm,
-        Ref{Cfloat}, #hh
-        Ref{Cint},   #itype
-        Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat}, #kext,salb,asym,rrate,dm,hfreez,pia13srt,
-        Ref{Cint}), #imembC
-        z13true,z35true,z13obs,pia13ret,pia35ret,
-        ic,jc,
-        z35Sim,lwc_ret,log10dNw,dr,
-        nodes,isurf,imu,ngates,nmfreqm,
-        hh,
-        itype,
-        kext,salb,asym,rrate,dm,hfreez,pia13srt,
-        imembC)
     end
-    return rrate[nodes[5]],rrate[nodes[2]], rrate
+    log10dNw.+=0.1
+    ccall((:fhb11_,"./combAlg"),Cvoid,(Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat}, # z13true,z35true,z13obs,pia13ret,pia35ret,
+    Ref{Cint},Ref{Cint}, #ic,jc
+    Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat}, #z35Sim,lwc_ret,log10dNw,dr,
+    Ref{Cint},Ref{Cint},Ref{Cint},Ref{Cint},Ref{Cint}, #nodes,isurf,imu,ngates,nmfreqm,
+    Ref{Cfloat}, #hh
+    Ref{Cint},   #itype
+    Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat}, #kext,salb,asym,rrate,dm,hfreez,pia13srt,
+    Ref{Cint}), #imembC
+    z13true,z35true,z13obs,pia13ret,pia35ret,
+    ic,jc,
+    z35Sim,lwc_ret,log10dNw,dr,
+    nodes,isurf,imu,ngates,nmfreqm,
+    hh,
+    itype,
+    kext,salb,asym,rrate,dm,hfreez,pia13srt,
+    imembC)
+    #println(lwc_ret)
+    #exit(-1)
+    #a=findall(rrate.>0)
+    #lwc_ret[a].=10 .^lwc_ret[a]
+    return rrate[nodes[5]],rrate[nodes[2]], lwc_ret, dm, log10dNw
 end

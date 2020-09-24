@@ -14,7 +14,7 @@ subroutine integratecvHB(z13,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
 
   real :: kext(ngates,nfreq),salb(ngates,nfreq),asym(ngates,nfreq)
   real :: rrate(ngates), d0(ngates)
-  real :: dr,f 
+  real :: dr,f
   integer :: igoto, iNoAd
   if(n0w(i1)<-3.0) then
      n0w(i1)=-3.0
@@ -22,10 +22,10 @@ subroutine integratecvHB(z13,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
   if(n0w(i1)>3.0) then
      n0w(i1)=3.0
   endif
- 
+
   igoto=1
   iNoAd=0
-10 continue  
+10 continue
   if(isnan(n0w(i1))) then
      n0w(i1)=-1
      iNoAd=1
@@ -68,7 +68,7 @@ subroutine integratecvHB(z13,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
      !pia13=pia13+dpia13
      !pia35=pia35+dpia35
   enddo
- 
+
   zb=0
   do i=max(i1,node(2)),min(i2,node(4)-1)
      dpia13=0.
@@ -103,7 +103,7 @@ subroutine integratecvHB(z13,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
           f*kextTable(i0,1:nfreq,imu(i))*10.**n0w(i)*&
           salbTable(i0,1:nfreq,imu(i))*&
           asymTable(i0,1:nfreq,imu(i))
-     
+
      asym(i,1:nfreq)=asym(i,1:nfreq)/salb(i,1:nfreq)
      salb(i,1:nfreq)=salb(i,1:nfreq)/kext(i,1:nfreq)
      salb(i,1:nfreq)=(1-f)*salbTableS2(i0,1:nfreq,imu(i))+&
@@ -114,7 +114,7 @@ subroutine integratecvHB(z13,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
      !pia13=pia13+dpia13
      !pia35=pia35+dpia35
   enddo
-  
+
   do i=max(i1,node(4)),min(i2,node(5))
      dpia13=0.
      dpia35=0.
@@ -149,7 +149,7 @@ subroutine integratecvHB(z13,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
      igoto=igoto+1
      goto 10
   endif
- 
+
   dpia13=dpia13/dr
   dpia35=dpia35/dr
   pwc(i1)=10.**pwc(i1)
@@ -157,9 +157,9 @@ end subroutine integratecvHB
 
 
 subroutine integratestHB(z13,z13obs,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
-     ngates,nfreq,node,dr,imu, dpia13, dpia35,kext,salb,asym,rrate,d0,dz1,dz2) !Sept 17, 2015 MG begin 
+     ngates,nfreq,node,dr,imu, dpia13, dpia35,kext,salb,asym,rrate,d0,dz1,dz2) !Sept 17, 2015 MG begin
   use tables2
-  implicit none 
+  implicit none
   integer :: nfreq
   real :: dr, f
   integer :: ngates,node(5),imu(ngates),i1,i2
@@ -170,12 +170,13 @@ subroutine integratestHB(z13,z13obs,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
   real :: kext(ngates,nfreq),salb(ngates,nfreq),asym(ngates,nfreq)
   real :: rrate(ngates),d0(ngates)
   real :: n0bb, dz1, dz2
+  real :: pwc1
   integer :: igoto, iNoAd
   igoto=1
   iNoAd=0
 
-10 continue 
-  
+10 continue
+
   if(n0w(i1)<-3.0) then
      n0w(i1)=-3.0
   endif
@@ -194,8 +195,10 @@ subroutine integratestHB(z13,z13obs,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
      kext(i1,1:nfreq)=0
      salb(i1,1:nfreq)=0
      asym(i1,1:nfreq)=0
+     pwc(i1)=0
      return
   endif
+  !print*,pwc
   do i=max(i1,node(1)),min(i2,node(2)-1)
         dpia13=0.
         dpia35=0.
@@ -207,7 +210,7 @@ subroutine integratestHB(z13,z13obs,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
         pwc(i)=pwc13TableS2(i0,imu(i))+n0w(i)
         rrate(i)=pr13TableS2(i0,imu(i))*10.**n0w(i)
         d0(i)=d013TableS2(i0,imu(i))
-     
+
         kext(i,1:nfreq)=kextTableS2(i0,1:nfreq,imu(i))*10.**n0w(i)
         salb(i,1:nfreq)=salbTableS2(i0,1:nfreq,imu(i))
         asym(i,1:nfreq)=asymTableS2(i0,1:nfreq,imu(i))
@@ -235,8 +238,14 @@ subroutine integratestHB(z13,z13obs,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
      z35mod(i)=((1-f)*z35TableS2(i0,imu(i))+f*(z35TableBB(i0,imu(i))))+10*(n0w(i)+n0bb)-(pia35+dpia35)
      z35(i)=((1-f)*z35TableS2(i0,imu(i))+f*(z35TableBB(i0,imu(i))))+10*(n0w(i)+n0bb)
 !  S2FM  end    06/16/2014
-     pwc(i)=((1-f)*pwc13TableS2(i0,imu(i))+f*pwc13TableBB(i0,imu(i)))+(n0w(i)+n0bb)
-     rrate(i)=pr13TableS2(i0,imu(i))*10.**(n0w(i)+n0bb)*(1-f)+pr13TableBB(i0,imu(i))*10.**(n0w(i)+n0bb)*(f)
+     pwc1=log10(((1-f)*10**pwc13TableS2(i0,imu(i)))+&
+     f*10**(pwc13Table(i0,imu(i))*0.25+f*10**pwc13TableBB(i0,imu(i))*0.75)*10**(n0w(i)+n0bb))
+
+     pwc(i)=(1-f)*pwc13TableS2(i0,imu(i))+&
+     f*pwc13Table(i0,imu(i))*0.25+f*pwc13TableBB(i0,imu(i))*0.75+(n0w(i)+n0bb)
+     !print*, 10**pwc1/10**pwc(i), 10**pwc(i)
+     rrate(i)=pr13TableS2(i0,imu(i))*10.**(n0w(i)+n0bb)*(1-f)+0.25*pr13Table(i0,imu(i))*10.**(n0w(i)+n0bb)*(f)+&
+     0.75*pr13TableBB(i0,imu(i))*10.**(n0w(i)+n0bb)*(f)
      d0(i)=d013TableS2(i0,imu(i))*(1-f)+f*d013TableBB(i0,imu(i))
      kext(i,1:nfreq)=(1-f)*kextTableS2(i0,1:nfreq,imu(i))*10.**(n0w(i)+n0bb)+ &
           f*kextTableBB(i0,1:nfreq,imu(i))*10.**(n0w(i)+n0bb)
@@ -248,11 +257,11 @@ subroutine integratestHB(z13,z13obs,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
           asymTableS2(i0,1:nfreq,imu(i))+ &
           f*kextTableBB(i0,1:nfreq,imu(i))*10.**(n0w(i)+n0bb)*salbTableBB(i0,1:nfreq,imu(i))*&
           asymTableBB(i0,1:nfreq,imu(i))
-        
+
      asym(i,1:nfreq)=asym(i,1:nfreq)/salb(i,1:nfreq)
      salb(i,1:nfreq)=salb(i,1:nfreq)/kext(i,1:nfreq)
 
-  
+
   enddo
 
   do i=max(i1,node(3)),min(i2,node(4)-1)
@@ -286,8 +295,12 @@ subroutine integratestHB(z13,z13obs,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
 !        asym(i,1:nfreq)=(1-f)*&
 !             asymTableBB(i0,1:nfreq,imu(i))+ &
 !             f*asymTable(i0,1:nfreq,imu(i))
-        pwc(i)=((1-f)*pwc13TableBB(i0,imu(i))+f*pwc13Table(i0,imu(i)))+(n0w(i)+n0bb)
-        rrate(i)=pr13TableBB(i0,imu(i))*10.**(n0w(i)+n0bb)*(1-f)+pr13Table(i0,imu(i))*10.**(n0w(i)+n0bb)*(f)
+        pwc(i)=log10(((1-f)*10.**pwc13TableBB(i0,imu(i))*0.75+(1-f)*10.**pwc13Table(i0,imu(i))*0.25+&
+        f*10.**pwc13Table(i0,imu(i)))*10**(n0w(i)+n0bb))
+        pwc(i)=((1-f)*pwc13TableBB(i0,imu(i))*0.75+(1-f)*pwc13Table(i0,imu(i))*0.25+&
+        f*pwc13Table(i0,imu(i)))+(n0w(i)+n0bb)
+        rrate(i)=0.25*pr13Table(i0,imu(i))*10.**(n0w(i)+n0bb)*(1-f)+&
+        0.75*pr13TableBB(i0,imu(i))*10.**(n0w(i)+n0bb)*(1-f)+pr13Table(i0,imu(i))*10.**(n0w(i)+n0bb)*(f)
         d0(i)=d013TableBB(i0,imu(i))*(1-f)+f*d013Table(i0,imu(i))
 !  S2FM  begin  06/16/2014; for M.Grecu, multiple scattering
         z35mod(i)=((1-f)*z35TableBB(i0,imu(i))+f*z35Table(i0,imu(i)))+10*(n0w(i)+n0bb)-(pia35+dpia35)
@@ -302,7 +315,7 @@ subroutine integratestHB(z13,z13obs,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
      if(i0<1) i0=1
      if(i0>nbins) i0=nbins
      dpia13=att13Table(i0,imu(i))*10.**n0w(i)*dr
-     
+
      dpia35=att35Table(i0,imu(i))*10.**n0w(i)*dr
      pwc(i)=pwc13Table(i0,imu(i))+n0w(i)
      rrate(i)=pr13Table(i0,imu(i))*10.**n0w(i)
@@ -324,7 +337,12 @@ subroutine integratestHB(z13,z13obs,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
 
   dpia35=dpia35/dr
   dpia13=dpia13/dr
-  pwc(i1)=10.**pwc(i1)
+  !print*,'bef',minval(pwc),i1,pwc(i1),i2,pwc(i2)
+  !print*,node
+  do i=max(i1,node(1)),min(i2,node(5))
+    pwc(i)=10.**pwc(i)
+  end do
+  !print*,'aft',minval(pwc)
 !  if(salb(i1,6)>kext(i1,6)) then
 !     print*, 'here we go', z13(i1), i1, node
 !     stop
@@ -334,7 +352,7 @@ end subroutine integratestHB !Sept 17, 2015 MG end
 subroutine integrateanvHB(z13,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
      ngates,nfreq,node,dr,imu, dpia13, dpia35,kext,salb,asym,rrate,d0)
   use tables2
-  implicit none 
+  implicit none
   integer :: nfreq
   real :: dr, f
   integer :: ngates,node(5),imu(ngates),i1,i2
@@ -346,8 +364,8 @@ subroutine integrateanvHB(z13,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
   real :: rrate(ngates),d0(ngates)
   integer :: igoto
   igoto=1
-10 continue 
-  
+10 continue
+
   if(n0w(i1)<-3.0) then
      n0w(i1)=-3.0
   endif
@@ -370,10 +388,10 @@ subroutine integrateanvHB(z13,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
      if(i0>i0max(imu(i))-1) i0=i0max(imu(i))-1
      dpia13=att13TableS(i0,imu(i))*10.**n0w(i)*dr
      dpia35=att35TableS(i0,imu(i))*10.**n0w(i)*dr
-     pwc(i)=pwc13TableS(i0,imu(i))+n0w(i)
+     pwc(i)=10**(pwc13TableS(i0,imu(i))+n0w(i))
      rrate(i)=pr13TableS(i0,imu(i))*10.**n0w(i)
      d0(i)=d013TableS(i0,imu(i))
-     
+
      kext(i,1:nfreq)=kextTableS(i0,1:nfreq,imu(i))*10.**n0w(i)
      salb(i,1:nfreq)=salbTableS(i0,1:nfreq,imu(i))
      asym(i,1:nfreq)=asymTableS(i0,1:nfreq,imu(i))
@@ -382,4 +400,5 @@ subroutine integrateanvHB(z13,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
      z35(i)=z35TableS(i0,imu(i))+10*n0w(i)
      !  SFM  end    06/16/2014
   enddo
+
 end subroutine integrateanvHB
