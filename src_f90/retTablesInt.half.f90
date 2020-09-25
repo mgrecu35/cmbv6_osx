@@ -73,7 +73,7 @@ subroutine integratecvHB(z13,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
   do i=max(i1,node(2)),min(i2,node(4)-1)
      dpia13=0.
      dpia35=0.
-     f=((i-node(2)+0.)/(node(4)-node(2)+0.))**2
+     f=((i-node(2)+0.)/(node(4)-node(2)+0.))
      !f=1.
      i0=(z13(i)-10.*n0w(i)-zmin)/dzbin+1
      if(i0<1) i0=1
