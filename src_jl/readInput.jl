@@ -3,65 +3,6 @@ push!(PyVector(pyimport("sys")["path"]), "./")
 #using .scatTables
 readS=pyimport("readScattProf")
 
-function readvar2d(fh,g1,g2,vname,nst,nt)
-    var=fh["groups"]["get"](g1)["groups"]["get"](g2)["variables"]["get"](vname)
-    nt1,nr=var["shape"]
-    var=var["_get"]([nst,0],[nt,nr],[1,1])
-    return var
-end
-function readvar2d_cmb(fh,g1,vname,nst,nt)
-    var=fh["groups"]["get"](g1)["variables"]["get"](vname)
-    nt1,nr=var["shape"]
-    var=var["_get"]([nst,0],[nt,nr],[1,1])
-    return var
-end
-function readvar3d(fh,g1,g2,vname,nst,nt)
-    var=fh["groups"]["get"](g1)["groups"]["get"](g2)["variables"]["get"](vname)
-    nt1,nr,nz=var["shape"]
-    var=var["_get"]([nst,0,0],[nt,nr,nz],[1,1,1])
-    return var
-end
-function readnetcdf(fname,nst,nt)
-    println(fname)
-    netcdf=pyimport("netCDF4")
-    fh=netcdf["Dataset"](fname,"r")
-    #println(fh)
-    zKu=fh["groups"]["get"]("NS")["groups"]["get"]("PRE")["variables"]["get"]("zFactorMeasured")
-    nt1,nr,nz=zKu["shape"]
-    zKa=fh["groups"]["get"]("MS")["groups"]["get"]("PRE")["variables"]["get"]("zFactorMeasured")
-    nt1,nr,nz=zKu["shape"]
-    zKu=zKu["_get"]([nst,0,0],[nt,nr,nz],[1,1,1])
-    nt1,nr,nz=zKa["shape"]
-    zKa=zKa["_get"]([nst,0,0],[nt,nr,nz],[1,1,1])
-    pType=readvar2d(fh,"NS","CSF","typePrecip",nst,nt)
-    binSf=readvar2d(fh,"NS","PRE","binRealSurface",nst,nt)
-    nodes=readvar3d(fh,"NS","DSD","binNode",nst,nt)
-    hZero=readvar2d(fh,"NS","VER","heightZeroDeg",nst,nt)
-    clutFree=readvar2d(fh,"NS","PRE","binClutterFreeBottom",nst,nt)
-    reliabF=readvar2d(fh,"NS","SRT","reliabFlag",nst,nt)
-    reliabKaF=readvar2d(fh,"MS","SRT","reliabFlag",nst,nt)
-    piaKu=readvar2d(fh,"NS","SRT","PIAhybrid",nst,nt)
-    piaKa=readvar2d(fh,"MS","SRT","PIAhybrid",nst,nt)
-    lat=readvar2d_cmb(fh,"NS","Latitude",nst,nt)
-    lon=readvar2d_cmb(fh,"NS","Longitude",nst,nt)
-    zeroDeg=readvar2d(fh,"NS","VER","binZeroDeg",nst,nt)
-    sfcType=readvar2d(fh,"NS","PRE","landSurfaceType",nst,nt)
-    fh["close"]()
-    return zKu,zKa,pType,binSf,hZero,nodes,clutFree,reliabF,piaKu,lat,lon,piaKa,reliabKaF,zeroDeg,sfcType
-end
-
-function readcomb(fname,ns,nt)
-    netcdf=pyimport("netCDF4")
-    fh=netcdf["Dataset"](fname,"r")
-    sfcPrecip=readvar2d_cmb(fh,"NS","surfPrecipTotRate",ns,nt)
-    sfcPrecipMS=readvar2d_cmb(fh,"MS","surfPrecipTotRate",ns,nt)
-    cmbLat=readvar2d_cmb(fh,"NS","Latitude",ns,nt)
-    cmbLon=readvar2d_cmb(fh,"NS","Longitude",ns,nt)
-    piaSRT=readvar2d(fh,"NS","Input","piaEffective",ns,nt)
-    relFlag=readvar2d(fh,"NS","Input","piaEffectiveReliabFlag",ns,nt)
-    fh["close"]
-    return sfcPrecip,cmbLat,cmbLon,sfcPrecipMS,piaSRT,relFlag
-end
 
 
 function readTables(fname)
@@ -87,7 +28,7 @@ function readTables(fname)
     attWT=fh1["variables"]["get"]("attWT")["_get"]([0],[240],[1])
     zWTs=fh1["variables"]["get"]("zWTs")["_get"]([0],[240],[1])
     zWT=fh1["variables"]["get"]("zWT")["_get"]([0],[240],[1])
-    
+
     rateTs=fh1["variables"]["get"]("rateS")["_get"]([0],[240],[1])
     rateT=fh1["variables"]["get"]("rate")["_get"]([0],[240],[1])
     fh1["close"]()

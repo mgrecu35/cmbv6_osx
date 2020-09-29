@@ -1,9 +1,9 @@
 
 ! this is the Hitschfeld Bordan solution
-! the variables in the command line are defined in 
+! the variables in the command line are defined in
 ! subroutine fModelFortran
 ! the formulae used in the solution are those in Grecu et al. 2011
- 
+
 subroutine fhb1(z13,z35,z13obs,&
      pia13,pia35,ic,jc,z35mod,lwc,log10dNw,dr,node,isurf,imu,&
      ngates,nmfreqm,hh,itype,kext,salb,asym,rrate,d0,hfreez)
@@ -30,8 +30,8 @@ subroutine fhb1(z13,z35,z13obs,&
   kext=-99.
   salb=-99.
   asym=-99.
-  
-  
+
+
   beta=0.75
   q=0.2*log(10.)*beta
   rrate=0
@@ -66,10 +66,10 @@ subroutine fhb1(z13,z35,z13obs,&
 !  SFM  end    06/22/2014
            if(itype==1) then
               call integratestHB(z13,z35,i,i,pia13,&                ! this subroutine returns
-                   pia35,z35mod,lwc(:),log10dNw(:), &               ! precipitation parameters 
+                   pia35,z35mod,lwc(:),log10dNw(:), &               ! precipitation parameters
                    ngates,nmfreqm,node,dr,imu(:),dpia13,dpia35,&    ! and electromagnetic properties
                    kext(:,:),salb(:,:),asym(:,:),rrate,d0)          ! as a function of z13(i)
-           else                                                     ! and log10dNw(i) 
+           else                                                     ! and log10dNw(i)
              call integratecvHB(z13,z35,i,i,pia13,&
                    pia35,z35mod,lwc(:),log10dNw(:), &
                    ngates,nmfreqm,node,dr,imu(:),dpia13,dpia35,&
@@ -93,7 +93,7 @@ subroutine fhb1(z13,z35,z13obs,&
         endif
         dzetaOld=dzeta
      enddo
-  
+
      dn=1.
      alpha=1
 
@@ -180,7 +180,7 @@ subroutine fhb11(z13,z35,z13obs,&
   kext=-99.
   salb=-99.
   asym=-99.
-  
+
   itype2=itype
   beta=0.75
   q=0.2*log(10.)*beta
@@ -209,6 +209,8 @@ subroutine fhb11(z13,z35,z13obs,&
   enddo
   !if(imembc+1==1) stop
   it=0
+  !print*, lwc
+  !stop
 10 continue
   z13=z13obs
   !print*, node
@@ -239,15 +241,15 @@ subroutine fhb11(z13,z35,z13obs,&
      do i=max(node(1)-5,1),node(1)
         z13(i)=z13obs(node(1))-(2.*rv(mod(imembC,50)+1)+1)*(node(1)-i)  !2*ran1()
         log10dNw(i)=log10dNw(node(1))
-        call integrateanvHB(z13,z35,i,i,pia13,&     ! this subroutine returns
-             pia35,z35mod,lwc(:),log10dNw(:), &    ! precipitation parameters 
-             ngates,nmfreqm,node,dr,imu(:),&
-             dpia13,dpia35,&  !and electromagnetic properties                  
-             kext(:,:),salb(:,:),asym(:,:),rrate,d0)
+        !call integrateanvHB(z13,z35,i,i,pia13,&     ! this subroutine returns
+        !     pia35,z35mod,lwc(:),log10dNw(:), &    ! precipitation parameters
+        !     ngates,nmfreqm,node,dr,imu(:),&
+        !     dpia13,dpia35,&  !and electromagnetic properties
+        !     kext(:,:),salb(:,:),asym(:,:),rrate,d0)
         z13(i)=z13obs(i)
      enddo
   endif
-
+  print*, itype
   !endif
   if(abs(log10dnw(node(1))+0.4589295)<1e-3) then
   !print*, log10dnw(node(1)),abs(log10dnw(node(1))+0.4589295)
@@ -267,7 +269,7 @@ subroutine fhb11(z13,z35,z13obs,&
         if(i0<1) i0=1
         pia35=pia35+1.*wv_extMemb(i0)*dr
         pia35=pia35+1*cld_extMemb(i0)*dr
-        
+
         if(z13(node(1))>60) then
         endif
 !  SFM  start  06/22/2014; for M.Grecu (unknown justification)
@@ -279,10 +281,10 @@ subroutine fhb11(z13,z35,z13obs,&
 !  SFM  start  06/22/2014
            if(itype==11) then
               call integratestHB(z13,z13obs,z35,i,i,pia13,&                ! this subroutine returns
-                   pia35,z35mod,lwc(:),log10dNw(:), &               ! precipitation parameters 
+                   pia35,z35mod,lwc(:),log10dNw(:), &               ! precipitation parameters
                    ngates,nmfreqm,node,dr,imu(:),dpia13,dpia35,&    ! and electromagnetic properties
                    kext(:,:),salb(:,:),asym(:,:),rrate,d0,dz1,dz2)          ! as a function of z13(i)
-           else                                                     ! and log10dNw(i) 
+           else                                                     ! and log10dNw(i)
               call integratecvHB(z13,z35,i,i,pia13,&
                    pia35,z35mod,lwc(:),log10dNw(:), &
                    ngates,nmfreqm,node,dr,imu(:),dpia13,dpia35,&
@@ -305,13 +307,13 @@ subroutine fhb11(z13,z35,z13obs,&
 !  SFM  start  06/22/2014; for M.Grecu (unknown justification)
            if(z13(i)>60) z13(i)=60.
 !  SFM  start  06/22/2014
-           
+
            if(itype==11) then
               call integratestHB(z13,z13obs,z35,i,i,pia13,&                ! this subroutine returns
-                   pia35,z35mod,lwc(:),log10dNw(:), &               ! precipitation parameters 
+                   pia35,z35mod,lwc(:),log10dNw(:), &               ! precipitation parameters
                    ngates,nmfreqm,node,dr,imu(:),dpia13,dpia35,&    ! and electromagnetic properties
                    kext(:,:),salb(:,:),asym(:,:),rrate,d0,dz1,dz2)          ! as a function of z13(i)
-           else                                                     ! and log10dNw(i) 
+           else                                                     ! and log10dNw(i)
               call integratecvHB(z13,z35,i,i,pia13,&
                    pia35,z35mod,lwc(:),log10dNw(:), &
                   ngates,nmfreqm,node,dr,imu(:),dpia13,dpia35,&
@@ -349,7 +351,7 @@ subroutine fhb11(z13,z35,z13obs,&
            pia13=pia13+dpia13*dr
            pia35=pia35+dpia35*dr
            pia13v=pia13v+dpia13*2*dr
- 
+
         else
            dpia13=0.
            dpia35=0.
@@ -363,18 +365,18 @@ subroutine fhb11(z13,z35,z13obs,&
         !pia35=pia35+atm_extKa(i0,ic)*dr
         !pia35=pia35+cld_extKa(i0,jc)*dr
 
-       
+
      enddo
-   
+
      pia35=pia35+dpia35*(isurf-node(5))*2.*dr
      pia13=pia13+dpia13*(isurf-node(5))*2.*dr
      pia13v=pia13v+dpia13*(isurf-node(5))*2.*dr
-     
+
      do i=node(1),node(5)
         if(rrate(i)>250 .and. iNoAd==0) then
            log10dNw(i)=log10dNw(i)+log10(250./rrate(i))
         endif
-      
+
      enddo
      !write(*,*) pia13, 'ITER=',j
   enddo
@@ -405,10 +407,10 @@ subroutine fhb11(z13,z35,z13obs,&
         !print*,pia13
         !stop
      endif
-     
+
   enddo
 
-  
+
 
 !  if(RMS>1e-5 ) write(*,*) 'RMS', rms, j
 !  if(pia13>3) write(*,*) 'PIAS=',pia13, pia13v, node(5), isurf
@@ -451,38 +453,38 @@ subroutine fhb12(z13,z35,z13obs,&
   kext=-99.
   salb=-99.
   asym=-99.
-  
-  
+
+
   beta=0.75
   q=0.2*log(10.)*beta
   do j=1,2
      log10dNw2=log10dNw+0.1
-     
-     call backprof(z13,z35,z13obs,pia13,pia35,z35mod,lwc,log10dNw, &       
-          ngates,nmfreqm,node,dr,imu,&  
+
+     call backprof(z13,z35,z13obs,pia13,pia35,z35mod,lwc,log10dNw, &
+          ngates,nmfreqm,node,dr,imu,&
           kext,salb,asym,rrate,d0,pia13nsfc,pia13srt,piaback,isurf,itype)
-     
+
      !perturbed backprop
-     
-     call backprof(z13,z35,z13obs,pia13,pia35,z35mod,lwc,log10dNw2, &       
-          ngates,nmfreqm,node,dr,imu,&  
+
+     call backprof(z13,z35,z13obs,pia13,pia35,z35mod,lwc,log10dNw2, &
+          ngates,nmfreqm,node,dr,imu,&
           kext,salb,asym,rrate,d0,pia13nsfc2,pia13srt,piaback2,isurf,itype)
-     
+
      if(abs(piaback2-piaback)>.1) then
         deltaN=-piaback/(piaback2-piaback)*0.1
         log10dNw=log10dNw+deltaN
      endif
-     
-     call backprof(z13,z35,z13obs,pia13,pia35,z35mod,lwc,log10dNw2, &       
-          ngates,nmfreqm,node,dr,imu,&  
+
+     call backprof(z13,z35,z13obs,pia13,pia35,z35mod,lwc,log10dNw2, &
+          ngates,nmfreqm,node,dr,imu,&
           kext,salb,asym,rrate,d0,pia13nsfc2,pia13srt,piaback2,isurf,itype)
   enddo
   !write(*,*) piaback, pia13srt+dpia13srt(imemb), imemb
 
 end subroutine fhb12
 
-subroutine backprof(z13,z35,z13obs,pia13,pia35,z35mod,lwc,log10dNw, &       
-     ngates,nmfreqm,node,dr,imu,&  
+subroutine backprof(z13,z35,z13obs,pia13,pia35,z35mod,lwc,log10dNw, &
+     ngates,nmfreqm,node,dr,imu,&
      kext,salb,asym,rrate,d0,pia13nsfc,pia13srt,piaback,isurf,itype)
   use nbinMod
   implicit none
@@ -511,10 +513,10 @@ subroutine backprof(z13,z35,z13obs,pia13,pia35,z35mod,lwc,log10dNw, &
      do j=1,5
         z13(i)=z13obs(i)+pia13nsfc
         if(itype==1) then
-           call integratestHB(z13,z35,i,i,pia13,&                
-                pia35,z35mod,lwc(:),log10dNw(:), &       
-                ngates,nmfreqm,node,dr,imu(:),dpia13,dpia35,&  
-                kext(:,:),salb(:,:),asym(:,:),rrate,d0) 
+           call integratestHB(z13,z35,i,i,pia13,&
+                pia35,z35mod,lwc(:),log10dNw(:), &
+                ngates,nmfreqm,node,dr,imu(:),dpia13,dpia35,&
+                kext(:,:),salb(:,:),asym(:,:),rrate,d0)
         else
            call integratecvHB(z13,z35,i,i,pia13,&
                 pia35,z35mod,lwc(:),log10dNw(:), &
@@ -522,7 +524,7 @@ subroutine backprof(z13,z35,z13obs,pia13,pia35,z35mod,lwc,log10dNw, &
                 kext(:,:),salb(:,:),asym(:,:),rrate,d0)
         endif
         pia13nsfc=pia13srt+dpia13srt(imemb+1)-dpia13*(isurf-node(5)+0.5)*2*dr
-        
+
      enddo
      pia13=pia13+dpia13*(isurf-node(5)+0.5)*2*dr
      dpia13old=dpia13
@@ -539,11 +541,11 @@ subroutine backprof(z13,z35,z13obs,pia13,pia35,z35mod,lwc,log10dNw, &
         do j=1,2
            z13(i)=z13obs(i)+piaback-(dpia13old+dpia13)*dr
            if(itype==1) then
-              call integratestHB(z13,z35,i,i,pia13,&                
-                   pia35,z35mod,lwc(:),log10dNw(:), &               
-                   ngates,nmfreqm,node,dr,imu(:),dpia13,dpia35,&    
-                   kext(:,:),salb(:,:),asym(:,:),rrate,d0)          
-           else                                                     
+              call integratestHB(z13,z35,i,i,pia13,&
+                   pia35,z35mod,lwc(:),log10dNw(:), &
+                   ngates,nmfreqm,node,dr,imu(:),dpia13,dpia35,&
+                   kext(:,:),salb(:,:),asym(:,:),rrate,d0)
+           else
               call integratecvHB(z13,z35,i,i,pia13,&
                    pia35,z35mod,lwc(:),log10dNw(:), &
                    ngates,nmfreqm,node,dr,imu(:),dpia13,dpia35,&

@@ -49,9 +49,12 @@ xl=[[300,400],[200,400],[600,700],[350,500],[100,220],[150,250],[350,450],
 #some congestus before 13
 #19 good conv tower
 #20
+#22 oklahome mcs
 #21 nice stratiform
-
-for ifile=22:22
+#7  stratiform
+#8 convective (isolated)
+#9
+for ifile=13:13
     zku,zka,sfcPrecip,zsfc,hzero,bcf,bst,brs,bzd,bbPeak,pType,sfcType,
     reliabF,piaSRT,locZAngle=readnetcdfj(fBigL[ifile])
     for di=-1:3

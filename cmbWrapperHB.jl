@@ -16,8 +16,10 @@ function callcmb(nodes,stormType,nmemb,nmu,brs,bst,hzero,bzd,bcf,bbPeak,sfcType,
     end
     #println(nodes)
     z13obs=Cfloat.(zeros(88))
+    z35obs=Cfloat.(zeros(88))
     for k=1:88
         z13obs[k]=Cfloat(10.0*log10((10^(0.1*zku[i,j,2*k])+10^(0.1*zku[i,j,2*k-1]))/2))
+        z35obs[k]=Cfloat(10.0*log10((10^(0.1*zka[i,j-12,2*k])+10^(0.1*zka[i,j-12,2*k-1]))/2))
     end
     reliabFpoint=Cint.(zeros(1))
     reliabFpoint[1]=Cint(relFlag[i,j]*0)
@@ -69,7 +71,7 @@ function callcmb(nodes,stormType,nmemb,nmu,brs,bst,hzero,bzd,bcf,bbPeak,sfcType,
         xs=1.0
     end
     for i=1:88
-        if dm[i]>0.5
+        if dm[i]>0.5 && (i<nodes[2] || i>nodes[4])
             log10dNw[i]-=0.15*xs*(dm[i]-1.5);
             i0dm=Int(trunc((dm[i]-0.5)/0.04));
             i0dm=max(0,i0dm)
@@ -89,7 +91,12 @@ function callcmb(nodes,stormType,nmemb,nmu,brs,bst,hzero,bzd,bcf,bbPeak,sfcType,
     if iBB==0
         log10dNw.+=0.6
     end
-    log10dNw[1:nodes[2]].+=-0.1;
+    log10dNw[nodes[1]:nodes[2]].+=0.01;
+    for k=nodes[1]:nodes[3]
+        if z35obs[k]>10 && z13obs[k]>0
+            log10dNw[k]+=0.3*(z35obs[k]-z35Sim[k])
+        end
+    end
     ccall((:fhb11_,"./combAlg"),Cvoid,(Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat}, # z13true,z35true,z13obs,pia13ret,pia35ret,
     Ref{Cint},Ref{Cint}, #ic,jc
     Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat}, #z35Sim,lwc_ret,log10dNw,dr,
@@ -106,9 +113,11 @@ function callcmb(nodes,stormType,nmemb,nmu,brs,bst,hzero,bzd,bcf,bbPeak,sfcType,
     itype,
     kext,salb,asym,rrate,dm,hfreez,pia13srt,
     imembC)
+    println(z35Sim)
     #println(lwc_ret)
     #exit(-1)
     #a=findall(rrate.>0)
     #lwc_ret[a].=10 .^lwc_ret[a]
-    return rrate[nodes[5]],rrate[nodes[2]], rrate,lwc_ret, dm, log10dNw
+    z35Sim=Float64.(copy(z35Sim))
+    return rrate[nodes[5]],rrate[nodes[2]], rrate,lwc_ret, dm, log10dNw,z35Sim
 end
