@@ -51,6 +51,21 @@ for i=-12:0.25:60
     push!(zXT,zX)
     push!(attXT,attX*4.343)
 end
+swcL=[]
+dnRet=0.5
+zXsT=[]
+attXsT=[]
+for i=-12:0.25:51
+    zObs1=i;
+    ns1=9
+    retZ=get_fZs(zObs1,ns1,bscatKu,scatKu,extKu,gKu,DeqKu,DeqKu_r,vfallKu,vfallKu_r,wlKu,dnRet,mu)
+    rwc, Z, att,scatInt,gInt, vdop, dm,rrate=retZ
+    push!(swcL,rwc)
+    zX, attX,scatIntX,gIntX, vdopX,dmX,rrateX=
+    get_rZs(rwc,dm,ns1,bscatX,scatX,extX,gX,DeqX,DeqX_r,vfallX,vfallX_r,wlX,dnRet,mu);
+    push!(zXsT,zX)
+    push!(attXsT,attX*4.343)
+end
 
 #println(minimum(dmTs))
 #println(minimum(dmT))
@@ -95,7 +110,7 @@ sysdN=Cfloat(-0.25) # if stratiform -=0.1
 ccall((:initgeophys_,"./combAlg"),Cvoid,(Ref{Cint},Ref{Cint},Ref{Cfloat}),
       nmemb,nmfreq,sysdN)
 #nmemb=50
-
+matplotlib=pyimport("matplotlib")
 pickle=pyimport("pickle")
 pfile=pybuiltin("open")("IPHEX0612/iphex0612.pklz","rb")
 zKuL,zKaL,zXL,dL=pickle.load(pfile)
@@ -111,8 +126,9 @@ sfcD=[]
 indL=[]
 nodesL=[]
 rrateL=[]
+pTypeL=[]
 #for i=1000:5000
-iret=0
+iret=1
 if iret==1
 for i=1:5000
     global zKu1,zKa1,zX1
@@ -133,7 +149,7 @@ for i=1:5000
     itop=isfc-3
     for k=70:isfc-3
         #global itop
-        println(zX1[k:k+3])
+        #println(zX1[k:k+3])
         if zX1[k]>0 && zX1[k+1]>0 && zX1[k+2]>0
             itop=k
             break
@@ -160,36 +176,39 @@ for i=1:5000
     sfcType=1
     hzero=30*0.125
     bcf=isfc-4
-    bzd=145
+    bzd=143
     bst=itop
     bbPeak=bzd
     nmfreq=8
     brs=isfc
+    pType=0
     if bst<140
         if zKu1[148]<40
             pType=1
         else
             pType=2
         end
-        println(pType)
+        #println(pType)
         #bbPeak= np.argmax(zX1[bbPeak-3:bbPeak+5])+bbPeak-3
         bzd=bbPeak
         ret=callcmb(brs,bst,hzero,bzd,bcf,bbPeak,sfcType,sysdN,pType,
-        zKu1,zKa1,relFlag,piaSRT,nmfreq,nwdm,ibb)
-        sfcRate,snowRate, rrate,lwc_ret, dm, log10dNw,z35Sim,zKaSimEns1,z13obs,z35obs,nodes=ret
+        zKu1,zKa1,zX1,relFlag,piaSRT,nmfreq,nwdm,ibb,zXT,attXT,zXsT,attXsT)
+        sfcRate,snowRate, rrate,lwc_ret, dm, log10dNw,z35Sim,zKaSimEns1,
+        z13obs,z35obs,nodes,zXtrue,zXobs=ret
         push!(zL1,z35Sim)
         push!(zL2,z35obs)
         push!(rrateL,rrate)
         push!(indL,i)
         push!(nodesL,[brs,bst,bzd,bcf,bbPeak])
+        push!(pTypeL,pType)
         if z35obs[nodes[5]]>0 && z35Sim[nodes[5]]>0
-            push!(sfcD,[z35obs[nodes[5]],z35Sim[nodes[5]],sfcRate])
+            push!(sfcD,[z35obs[nodes[5]],z35Sim[nodes[5]],zXtrue[nodes[5]],zXobs[nodes[5]],sfcRate])
 
         end
     end
 end
 nodesL=np.array(nodesL)
-plt=pyimport("matplotlib.pyplot")
+#plt=pyimport("matplotlib.pyplot")
 plt.figure()
 plt.subplot(211)
 plt.pcolormesh(zKuL',vmin=0,vmax=45,cmap="jet")
@@ -205,16 +224,28 @@ plt.plot(175 .-bzdL)
 plt.plot(175 .-rsL)
 plt.ylim(0,100)
 plt.xlim(2600,3900)
+sfcD=np.array(sfcD)
+
+a=findall(sfcD[:,4].>0)
+println(np.corrcoef(sfcD[a,3],sfcD[a,4]))
+println(np.corrcoef(sfcD[a,1],sfcD[a,2]))
+println(np.mean(sfcD[a,:],axis=0))
 rrateL=np.array(rrateL)
 
 figure()
-plt.pcolormesh(log10.(rrateL.+1e-9)',vmin=-2,vmax=2,cmap="jet")
+plt.pcolormesh((rrateL.+1e-9)',vmin=0.1,vmax=100,cmap="jet",norm=matplotlib.colors.LogNorm())
 #plt.plot(175 .-isfcL)
 #plt.plot(175 .-bzdL)
 #plt.plot(175 .-rsL)
-plt.plot(nodesL[:,end]./2)
+#plt.plot(nodesL[:,end]./2)
 plt.xlim(2200,3200)
 plt.ylim(88,40)
+plt.ylabel("Range bin")
+plt.xlabel("Profile#")
+cbar=plt.colorbar()
+cbar.ax.set_title("mm/h")
+plt.savefig("retrievedRateRate.png")
+
 
 
 plt.figure()
@@ -222,13 +253,19 @@ zL1=np.array(zL1)
 zL2=np.array(zL2)
 plt.subplot(211)
 plt.pcolormesh((zL1.+0)',vmin=0,vmax=40,cmap="jet")
-plt.plot(nodesL[:,end]./2)
+#plt.plot(nodesL[:,end]./2)
 plt.xlim(2200,3200)
 plt.ylim(88,40)
+plt.ylabel("Range bin")
+plt.colorbar()
 plt.subplot(212)
 plt.pcolormesh(zL2',vmin=0,vmax=40,cmap="jet")
 plt.xlim(2200,3200)
 plt.ylim(88,40)
+plt.ylabel("Range bin")
+plt.xlabel("Profile#")
+plt.colorbar()
+plt.savefig("zKaObsAndSims.png")
 
 plt.figure()
 plt.plot(zL1[2800,end:-1:1],(1:88).*2)
@@ -237,3 +274,6 @@ plt.plot(zKaL[3643,:],1:176)
 plt.xlim(0,50)
 plt.ylim(0,100)
 end
+#[1.0 0.884354; 0.884354 1.0]
+#[1.0 0.823746; 0.823746 1.0]
+#[21.0718, 21.6027, 26.8847, 30.1095, 2.77357]

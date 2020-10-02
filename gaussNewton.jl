@@ -1,7 +1,7 @@
 using Statistics
 np=pyimport("numpy")
 function callcmb(brs,bst,hzero,bzd,bcf,bbPeak,sfcType,sysdN,pType,
-    zku,zka,relFlag,piaSRT,nmfreq,nwdm,iBB)
+    zku,zka,zx,relFlag,piaSRT,nmfreq,nwdm,iBB,zXT,attXT,zXsT,attXsT)
 
     #println(nmemb, "  ",nmfreq, " ",nmemb)
     nodes=Cint.(zeros(5))
@@ -19,9 +19,11 @@ function callcmb(brs,bst,hzero,bzd,bcf,bbPeak,sfcType,sysdN,pType,
     #println(nodes)
     z13obs=Cfloat.(zeros(88))
     z35obs=Cfloat.(zeros(88))
+    zXobs=Cfloat.(zeros(88))
     for k=1:88
         z13obs[k]=Cfloat(10.0*log10((10^(0.1*zku[2*k])+10^(0.1*zku[2*k-1]))/2))
         z35obs[k]=Cfloat(10.0*log10((10^(0.1*zka[2*k])+10^(0.1*zka[2*k-1]))/2))-2.0
+        zXobs[k]=Cfloat(10.0*log10((10^(0.1*zx[2*k])+10^(0.1*zx[2*k-1]))/2))
     end
     reliabFpoint=Cint.(zeros(1))
     reliabFpoint[1]=Cint(relFlag*0)
@@ -82,8 +84,8 @@ function callcmb(brs,bst,hzero,bzd,bcf,bbPeak,sfcType,sysdN,pType,
     else
         xs=1.0
     end
-    println(nodes)
-    println(typeof(log10dNw))
+    #println(nodes)
+    #println(typeof(log10dNw))
 
     adj=1
     if  adj==1
@@ -111,7 +113,7 @@ function callcmb(brs,bst,hzero,bzd,bcf,bbPeak,sfcType,sysdN,pType,
         log10dNw[nodes[1]:nodes[2]].+=0.01;
         for k=nodes[1]:nodes[3]
             if z35obs[k]>10 && z13obs[k]>0
-                log10dNw[k]+=0.03*(z35obs[k]-z35Sim[k])
+                log10dNw[k]+=0.3*(z35obs[k]-z35Sim[k])
             end
         end
         ccall((:fhb11_,"./combAlg"),Cvoid,(Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat}, # z13true,z35true,z13obs,pia13ret,pia35ret,
@@ -177,7 +179,7 @@ function callcmb(brs,bst,hzero,bzd,bcf,bbPeak,sfcType,sysdN,pType,
     log10dNw[nodes[1]:nodes[5]].=log10dNwref[nodes[1]:nodes[5]].+dnw[nodes[1]:nodes[5]]
 
     log10dNw=Cfloat.(log10dNw)
-    println(typeof(log10dNw),size(log10dNw))
+    #println(typeof(log10dNw),size(log10dNw))
     ccall((:fhb11_,"./combAlg"),Cvoid,(Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat}, # z13true,z35true,z13obs,pia13ret,pia35ret,
     Ref{Cint},Ref{Cint}, #ic,jc
     Ref{Cfloat},Ref{Cfloat},Ref{Cfloat},Ref{Cfloat}, #z35Sim,lwc_ret,log10dNw,dr,
@@ -196,7 +198,16 @@ function callcmb(brs,bst,hzero,bzd,bcf,bbPeak,sfcType,sysdN,pType,
     imembC)
 end
     z35Sim=Float64.(copy(z35Sim))
-
-
-    return rrate[nodes[5]],rrate[nodes[2]], rrate,lwc_ret, dm, log10dNw,z35Sim,z35Sim,z13obs,z35obs,nodes
+    zXtrue=copy(z13true)
+    piaX=0
+    for i=nodes[4]:nodes[5]
+        i0=Int(trunc(z13true[i]+12-10*log10dNw[i])/0.25)
+        i0=max(i0,1)
+        i0=min(289,i0)
+        piaX+=attXT[i0]*10^log10dNw[i]*dr
+        zXtrue[i]=zXT[i0]+10*log10dNw[i]-piaX
+        piaX+=attXT[i0]*10^log10dNw[i]*dr
+    end
+    return rrate[nodes[5]],rrate[nodes[2]], rrate,lwc_ret, dm, log10dNw,z35Sim,z35Sim,z13obs,z35obs,nodes,
+    zXtrue,zXobs
 end
