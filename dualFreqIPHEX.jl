@@ -22,6 +22,36 @@ using .scatTables
 zKuT,zKaT,attKuT,attKaT,dmT,nwT,pwcT,zKuTs,zKaTs,attKuTs,attKaTs,dmTs,
 dmTs,nwTs,pwcTs,attWTs,attWT,zWTs,zWT,rateT,rateTs=readTables(fnameT)
 
+
+ns=9
+temp,mass,fraction,bscat,Deq,ext,scat,g,vfall,
+temp_r,mass_r,bscat_r,Deq_r,ext_r,scat_r,g_r,vfall_r,
+tempKu,massKu,fractionKu,bscatKu,DeqKu,extKu,scatKu,gKu,vfallKu,
+tempKu_r,massKu_r,bscatKu_r,DeqKu_r,extKu_r,scatKu_r,gKu_r,vfallKu_r,
+tempW,massW,fractionW,bscatW,DeqW,extW,scatW,gW,vfallW,tempW_r,massW_r,bscatW_r,DeqW_r,
+extW_r,scatW_r,gW_r,vfallW_r,
+tempX,massX,fractionX,bscatX,DeqX,extX,scatX,gX,vfallX,tempX_r,massX_r,bscatX_r,DeqX_r,
+extX_r,scatX_r,gX_r,vfallX_r=scatTables.init()
+freqKu=13.8
+wlKu=300/freqKu
+freqX=9.6
+wlX=300/freqX
+zObs1=10.0
+dnRet=0.27
+mu=2.0
+rwcL=[]
+zXT=[]
+attXT=[]
+for i=-12:0.25:60
+    zObs1=i+0.0
+    retZ=get_fZr(zObs1,bscatKu_r,scatKu_r,extKu_r,gKu_r,DeqKu_r,vfallKu_r,wlKu,dnRet,mu)
+    rwc, Z, att,scatInt,gInt, vdop, dm, rrate=retZ
+    zX, attX,scatIntX,gIntX, vdopX,dmX,rrate=get_Zr(rwc,bscatX_r,scatX_r,extX_r,gX_r,DeqX_r,vfallX_r,wlX,dnRet,mu)
+    push!(rwcL,rwc)
+    push!(zXT,zX)
+    push!(attXT,attX*4.343)
+end
+
 #println(minimum(dmTs))
 #println(minimum(dmT))
 #println(maximum(rateT))
@@ -41,17 +71,8 @@ newTables_old=get_CMB_Tables_old(dnr_old,dnbb_old,dns_old)
 zKuJ,attKuJ,pwcJ,rrateJ,dmJ,
 zKuBBJ,attKuBBJ,pwcBBJ,rrateBBJ,dmBBJ,
 zKuSJ,attKuSJ,pwcSJ,rrateSJ,dmSJ,nbinsj,
-zKaJ,attKaJ,zKaBBJ,attKaBBJ,zKaSJ,attKaSJ,dNw,dNwBB,dNwSJ=newTables
-zKuSJ=zKuTs
-zKaSJ=zKaTs
-attKuSJ=attKuTs
-attKaSJ=attKaTs
-rrateSJ=rateTs
-pwcSJ=log10.(pwcTs)
-newTable2=[zKuJ,attKuJ,pwcJ,rrateJ,dmJ,
-zKuBBJ,attKuBBJ,pwcBBJ,rrateBBJ,dmBBJ,
-zKuSJ,attKuSJ,pwcSJ,rrateSJ,dmSJ,nbinsj,
-zKaJ,attKaJ,zKaBBJ,attKaBBJ,zKaSJ,attKaSJ,dNw,dNwBB,dNwSJ]
+zKaJ,attKaJ,zKaBBJ,attKaBBJ,zKaSJ,attKaSJ=newTables_old
+
 
 nwdm=np.loadtxt("AncData/nw-dm.txt");
 nwdm[:,2:3].-=log10(8.0e6);
@@ -67,7 +88,7 @@ zL=[]
 zL2=[]
 nwdmL=[]
 nc=pyimport("netCDF4")
-include("cmbWrapperHB.jl")
+include("gaussNewton.jl")
 ccall((:cloud_init_,"./combAlg"),Cvoid,(Ref{Cint},),nmfreq)
 ccall((:__nbinmod_MOD_init_nbin,"./combAlg"),Cvoid,(),)
 sysdN=Cfloat(-0.25) # if stratiform -=0.1
@@ -83,7 +104,17 @@ bzdL=[]
 rsL=[]
 zetaL=[]
 ibbL=[]
-for i=1:5880
+zL1=[]
+zL2=[]
+rL=[]
+sfcD=[]
+indL=[]
+nodesL=[]
+rrateL=[]
+#for i=1000:5000
+iret=0
+if iret==1
+for i=1:5000
     global zKu1,zKa1,zX1
     zKu1=zKuL[i,end:-1:1]
     zKa1=zKaL[i,end:-1:1]
@@ -100,7 +131,9 @@ for i=1:5880
     isfc=argmax(zX1)-3
     push!(isfcL,isfc)
     itop=isfc-3
-    for k=1:isfc-3
+    for k=70:isfc-3
+        #global itop
+        println(zX1[k:k+3])
         if zX1[k]>0 && zX1[k+1]>0 && zX1[k+2]>0
             itop=k
             break
@@ -120,15 +153,87 @@ for i=1:5880
     push!(zetaL,zeta)
     push!(rsL,itop)
     push!(ibbL,ibb)
+    relFlag=0
+    piaSRT=-1
+    sysdN1=sysdN+0.35
+    dnv=(0.00005*randn(88).+sysdN1)
+    sfcType=1
+    hzero=30*0.125
+    bcf=isfc-4
+    bzd=145
+    bst=itop
+    bbPeak=bzd
+    nmfreq=8
+    brs=isfc
+    if bst<140
+        if zKu1[148]<40
+            pType=1
+        else
+            pType=2
+        end
+        println(pType)
+        #bbPeak= np.argmax(zX1[bbPeak-3:bbPeak+5])+bbPeak-3
+        bzd=bbPeak
+        ret=callcmb(brs,bst,hzero,bzd,bcf,bbPeak,sfcType,sysdN,pType,
+        zKu1,zKa1,relFlag,piaSRT,nmfreq,nwdm,ibb)
+        sfcRate,snowRate, rrate,lwc_ret, dm, log10dNw,z35Sim,zKaSimEns1,z13obs,z35obs,nodes=ret
+        push!(zL1,z35Sim)
+        push!(zL2,z35obs)
+        push!(rrateL,rrate)
+        push!(indL,i)
+        push!(nodesL,[brs,bst,bzd,bcf,bbPeak])
+        if z35obs[nodes[5]]>0 && z35Sim[nodes[5]]>0
+            push!(sfcD,[z35obs[nodes[5]],z35Sim[nodes[5]],sfcRate])
+
+        end
+    end
 end
+nodesL=np.array(nodesL)
 plt=pyimport("matplotlib.pyplot")
+plt.figure()
 plt.subplot(211)
 plt.pcolormesh(zKuL',vmin=0,vmax=45,cmap="jet")
 plt.plot(175 .-isfcL)
 plt.plot(175 .-bzdL)
 plt.plot(175 .-rsL)
 plt.ylim(0,100)
-plt.xlim(2000,3000)
+plt.xlim(2600,3900)
 plt.subplot(212)
-plt.plot(ibbL)
-plt.xlim(2000,3000)
+plt.pcolormesh(zKaL',vmin=0,vmax=40,cmap="jet")
+plt.plot(175 .-isfcL)
+plt.plot(175 .-bzdL)
+plt.plot(175 .-rsL)
+plt.ylim(0,100)
+plt.xlim(2600,3900)
+rrateL=np.array(rrateL)
+
+figure()
+plt.pcolormesh(log10.(rrateL.+1e-9)',vmin=-2,vmax=2,cmap="jet")
+#plt.plot(175 .-isfcL)
+#plt.plot(175 .-bzdL)
+#plt.plot(175 .-rsL)
+plt.plot(nodesL[:,end]./2)
+plt.xlim(2200,3200)
+plt.ylim(88,40)
+
+
+plt.figure()
+zL1=np.array(zL1)
+zL2=np.array(zL2)
+plt.subplot(211)
+plt.pcolormesh((zL1.+0)',vmin=0,vmax=40,cmap="jet")
+plt.plot(nodesL[:,end]./2)
+plt.xlim(2200,3200)
+plt.ylim(88,40)
+plt.subplot(212)
+plt.pcolormesh(zL2',vmin=0,vmax=40,cmap="jet")
+plt.xlim(2200,3200)
+plt.ylim(88,40)
+
+plt.figure()
+plt.plot(zL1[2800,end:-1:1],(1:88).*2)
+plt.plot(zKuL[3643,:],1:176)
+plt.plot(zKaL[3643,:],1:176)
+plt.xlim(0,50)
+plt.ylim(0,100)
+end

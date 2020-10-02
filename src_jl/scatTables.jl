@@ -70,6 +70,9 @@ function init()
     fnameIceW="ice-self-similar-aggregates_94-GHz_scat.nc"
     fnameRainW="liquid-water_94-GHz_scat.nc"
 
+    fnameIceX="ice-self-similar-aggregates_X_scat.nc"
+    fnameRainX="liquid-water_X_scat.nc"
+
     temp,mass,fraction,bscat,Deq,
     ext,scat,g,vfall=readS["readScatProf"](fnameIce);
     temp_r,mass_r,bscat_r,Deq_r,
@@ -82,12 +85,18 @@ function init()
     extW,scatW,gW,vfallW=readS["readScatProf"](fnameIceW);
     tempW_r,massW_r,bscatW_r,DeqW_r,
     extW_r,scatW_r,gW_r,vfallW_r=readS["readScatProfR"](fnameRainW);
+    tempX,massX,fractionX,bscatX,DeqX,
+    extX,scatX,gX,vfallX=readS["readScatProf"](fnameIceX);
+    tempX_r,massX_r,bscatX_r,DeqX_r,
+    extX_r,scatX_r,gX_r,vfallX_r=readS["readScatProfR"](fnameRainX);
     return temp,mass,fraction,bscat,Deq,ext,scat,g,vfall,
     temp_r,mass_r,bscat_r,Deq_r,ext_r,scat_r,g_r,vfall_r,
     tempKu,massKu,fractionKu,bscatKu,DeqKu,extKu,scatKu,gKu,vfallKu,
     tempKu_r,massKu_r,bscatKu_r,DeqKu_r,extKu_r,scatKu_r,gKu_r,vfallKu_r,
     tempW,massW,fractionW,bscatW,DeqW,extW,scatW,gW,vfallW,tempW_r,massW_r,bscatW_r,DeqW_r,
-    extW_r,scatW_r,gW_r,vfallW_r
+    extW_r,scatW_r,gW_r,vfallW_r,
+    tempX,massX,fractionX,bscatX,DeqX,extX,scatX,gX,vfallX,tempX_r,massX_r,bscatX_r,DeqX_r,
+    extX_r,scatX_r,gX_r,vfallX_r
     #exit()
 end
 export getDmNwR, getDmNwS
@@ -258,7 +267,7 @@ function getDmNwSF(tempKu::Array{Float32,1},massKu::Array{Float32,2},fractionKu:
             rwc1, Z1, att1,scatInt1,gInt1, vdop1, dm1, rrate1=retZ1
             gradDm=(dm1-dm)/(log(dn1/dn))
             dnRet=dn*exp(1.0*(dmc-dm)*gradDm/(gradDm*gradDm+0.000001))
-            
+
         end
         println("dmfirst=$(dm) $(rwc) $(dmc)")
         #dnRet=0.1
